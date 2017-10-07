@@ -1,0 +1,18 @@
+function wait(ms){
+   var start = new Date().getTime();
+   var end = start;
+   while(end < start + ms) {
+     end = new Date().getTime();
+  }
+}
+
+
+window.setInterval(function () {
+	if ($('#div_traderAuctioneer > div.content > div.left_box > div.left_content > a').text().trim() != "MOTYLA NOGA"){ //MOTYLA NOGA
+		$('#div_traderAuctioneer > div.content > div.right_box > div.right_content > div > table > tbody > tr:nth-child(5) > td:nth-child(5) > a').click()
+		wait(300)
+		$('#div_traderAuctioneer > div.content > div.right_box > div.right_content > a').click()
+	}
+
+}, 900); 
+
