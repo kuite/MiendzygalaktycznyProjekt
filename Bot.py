@@ -84,6 +84,9 @@ class Bot:
             print('p Planet handling time elapsed {}, random sleep time: {}[ms]'.format(time_elapsed, sleep_time))
             sleep(sleep_time)
 
+    def start_fleet(self):
+        pass
+
     def start_eco(self):
         planets = self.planets
         researches = self.ogame.get_research()
@@ -245,7 +248,7 @@ class Bot:
         researches = self.researches
         ships = self.planet_infos[planet_id].ships
         defense = self.planet_infos[planet_id].defense
-        print('DEBUG: c1, c2, c3 in cells:')
+        # print('DEBUG: c1, c2, c3 in cells:')
         for c1, c2, c3 in cells:
             if c1.value == '':
                 return
@@ -313,7 +316,7 @@ class Bot:
             return
 
         req_metal = working_request['metal']
-        req_crystal = working_request ['crystal']
+        req_crystal = working_request['crystal']
         req_deuterium = working_request['deuterium']
         req_building = working_request['building']
         req_level = working_request['level']
@@ -385,32 +388,28 @@ class Bot:
         print('send expedition from mother to: {}'.format(where))
 
     def request_resources_for_next_build(self, planet_info, res_req_db, shared_cells):
-        print('DEBUG: exst_req = res_req_db.search(Query().requesting == planet_info.infos[coordinate])')
+        # print('DEBUG: exst_req = res_req_db.search(Query().requesting == planet_info.infos[coordinate])')
         exst_req = res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
         # if exst_req is None:
         #     return
-        print('DEBUG: len(exst_req)')
+        # print('DEBUG: len(exst_req)')
         if len(exst_req) > 0:
             return
         print('DEBUG: for c1, c2, c3 in shared_cells:')
         for c1, c2, c3 in shared_cells:
-            if c1.value == '' or c1.value == 'solar_satellite':
+            if c1.value is None or c1.value == '' or c1.value == 'solar_satellite':
                 continue
+            # print('DEBUG: Utils.calc_build_cost({}, {}):'.format(c1.value, c2.value))
             cost = Utils.calc_build_cost(c1.value, c2.value)
+            building = c1.value
+            level = c2.value
+            if building in planet_info.facilities and planet_info.facilities[building] >= level:
+                continue
+            if building in planet_info.resources_buildings and planet_info.resources_buildings[building] >= level:
+                continue
             res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
-                               'deuterium': cost[2], 'building': c1.value, 'level': c2.value, 'login': self.login,
+                               'deuterium': cost[2], 'building': building, 'level': level, 'login': self.login,
                                'uni': self.uni})
-
-            # elif c1.value in planet_info.resources_buildings and planet_info.resources_buildings[c1.value] < c2.value:
-            #     cost = Utils.calc_build_cost(c1.value, c2.value)
-            #    res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
-            #                       'deuterium': cost[2], 'building': c1.value, 'level': c2.value, 'login': self.login})
-            #     return
-            # elif c1.value in planet_info.facilities and planet_info.facilities[c1.value] < c2.value:
-            #     cost = Utils.calc_build_cost(c1.value, c2.value)
-            #     res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
-            #                        'deuterium': cost[2], 'building': c1.value, 'level': c2.value})
-            #     return
 
     def build_next_build(self, planet_info, shared_cells):
         pass

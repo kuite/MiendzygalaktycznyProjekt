@@ -8,7 +8,11 @@ function wait(ms){
 
 
 window.setInterval(function () {
-	if ($('#div_traderAuctioneer > div.content > div.left_box > div.left_content > a').text().trim() != "MOTYLA NOGA"){ //MOTYLA NOGA
+	if ($('#div_traderAuctioneer > div.content > div.left_box > div.left_content > a').text().trim() != "MOTYLA NOGA" &&
+		!$('#traderOverview > div:nth-child(14) > div.t_Content > div > div > h1').text().includes("brąz") &&
+		$('#div_traderAuctioneer > div.content > div.left_box > div.left_content > p > span > b').text().includes(" 35min.") &&
+		parseFloat($('#div_traderAuctioneer > div.content > div.left_box > div.left_content > div.detail_value.odd.currentSum').text().replace('.', '')) < 2000000)
+	{ 
 		$('#div_traderAuctioneer > div.content > div.right_box > div.right_content > div > table > tbody > tr:nth-child(5) > td:nth-child(5) > a').click()
 		wait(300)
 		$('#div_traderAuctioneer > div.content > div.right_box > div.right_content > a').click()
