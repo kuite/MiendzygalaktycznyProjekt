@@ -320,13 +320,12 @@ class Bot:
         req_deuterium = working_request['deuterium']
         req_building = working_request['building']
         req_level = working_request['level']
-
+        total_resources = req_metal + req_crystal + req_deuterium
 
         # check if building is more advanced than on mother if yes return someday
         metal = mother_info.resources['metal']
         crystal = mother_info.resources['crystal']
         deuterium = mother_info.resources['deuterium']
-        total_resources = metal + crystal + deuterium
 
         if metal > req_metal and crystal > req_crystal and deuterium > req_deuterium:
             dt_count = int(total_resources / 25000) + 1
@@ -388,14 +387,13 @@ class Bot:
         print('send expedition from mother to: {}'.format(where))
 
     def request_resources_for_next_build(self, planet_info, res_req_db, shared_cells):
-        # print('DEBUG: exst_req = res_req_db.search(Query().requesting == planet_info.infos[coordinate])')
         exst_req = res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
-        # if exst_req is None:
-        #     return
+        if exst_req is None:
+            return
         # print('DEBUG: len(exst_req)')
         if len(exst_req) > 0:
             return
-        print('DEBUG: for c1, c2, c3 in shared_cells:')
+        # print('DEBUG: for c1, c2, c3 in shared_cells:')
         for c1, c2, c3 in shared_cells:
             if c1.value is None or c1.value == '' or c1.value == 'solar_satellite':
                 continue

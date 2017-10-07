@@ -44,7 +44,7 @@ while True:
             print('Time elapsed for {} is {}[hh:mm:ss.ms]'.format(login, time_elapsed))
 
     timeElapsed = datetime.now() - startTime
-    wait_time = random.uniform(1800, 1600)
+    wait_time = random.uniform(1300, 1600)
     print('{}: **************     ENDED CHECKING ALL ACCOUNTS: elapsed cycle time: {}[hh:mm:ss.ms], '
           'defend time: {:6.2f}[m]'.format(datetime.now(), timeElapsed, wait_time/60))
 
