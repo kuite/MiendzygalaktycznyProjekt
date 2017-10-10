@@ -64,7 +64,6 @@ while True:
 
             account = login
             if e.value == 'def':
-                # bot = Bot(login, password, server, uni)
                 ogame = OGame(uni, login, password, server)
                 timeout = time.time() + wait_time  # (60*5) 5 minutes from now
                 while True:

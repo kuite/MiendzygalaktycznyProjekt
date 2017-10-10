@@ -4,7 +4,7 @@ import Utils
 import openpyxl
 from time import sleep
 import random
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, Query, where
 from datetime import datetime
 
 
@@ -66,10 +66,12 @@ class Bot:
                 if planet_id == self.mother_id:
                     self.send_expedition(planet_info)
                     self.check_defense_and_ships(planet_info)
+                    self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
                     self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
                 else:
+
+                    self.buildOnPlanetFromParsedXlsx(planet_id, self.shared_cells, planet_info)
                     self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
-                self.buildOnPlanetFromParsedXlsx(planet_id, self.shared_cells, planet_info)
                 self.collect_resources(self.mother_id, planet_info)
             else:
                 if planet_id == self.mother_id:
@@ -115,8 +117,6 @@ class Bot:
                     self.check_minimum_large_cargos(planet_info)
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
                 else:
-                    if planet_info.level < 1:
-                        self.request_starter_resources(planet_info, self.res_req_db)
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.colony_cells, planet_info)
 
             sleep_time = random.uniform(0.5, 1.4)
@@ -288,6 +288,7 @@ class Bot:
                 return
 
     def send_resources_from_mother_if_possible(self, mother_info, res_req_db):
+        # return #delete after
         print('sending resources if possible from: '.format(mother_info.infos['planet_name']))
         # check if there is pending request in database
         # send all resources if have for whole request ONLY
@@ -306,9 +307,10 @@ class Bot:
             req_crystal = request['crystal']
             req_deuterium = request['deuterium']
             req_total_cost = req_metal + 2*req_crystal + 2.1*req_deuterium
+            was_sent = request['sent']
 
             # find lowest request
-            if req_total_cost < lowest_request:
+            if req_total_cost < lowest_request or was_sent == 'true':
                 working_request = request
                 break
 
@@ -331,13 +333,20 @@ class Bot:
             dt_count = int(total_resources / 25000) + 1
             ships = [(Ships['LargeCargo'], dt_count)]
             speed = Speed['100%']
-            where = {'galaxy': working_request['requesting']['galaxy'],
+            where_to = {'galaxy': working_request['requesting']['galaxy'],
                      'system': working_request['requesting']['system'],
                      'position': working_request['requesting']['position']}
             mission = Missions['Transport']
             request_resources = {'metal': req_metal, 'crystal': req_crystal, 'deuterium': req_deuterium}
-            self.ogame.send_fleet(mother_info.id, ships, speed, where, mission, request_resources)
-            print('-> sending resources from mother to: ' + str(where))
+            self.ogame.send_fleet(mother_info.id, ships, speed, where_to, mission, request_resources)
+            res_req_db.remove(where('requesting') == working_request['requesting'] and
+                              where('metal') == req_metal and
+                              where('crystal') == req_crystal)
+            res_req_db.insert({'requesting': working_request['requesting'], 'metal': req_metal, 'crystal': req_crystal,
+                               'deuterium': req_deuterium, 'building': working_request['building'],
+                               'level': working_request['level'], 'login': self.login,
+                               'uni': self.uni, 'sent': 'true'})
+            print('-> sending resources from mother to: ' + str(where_to))
 
     def collect_resources(self, mother_id, planet_info):
         dt = planet_info.ships['large_cargo']
@@ -407,7 +416,7 @@ class Bot:
                 continue
             res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
                                'deuterium': cost[2], 'building': building, 'level': level, 'login': self.login,
-                               'uni': self.uni})
+                               'uni': self.uni, 'sent': 'false'})
 
     def build_next_build(self, planet_info, shared_cells):
         pass
