@@ -13,7 +13,7 @@ from datetime import datetime
 print('jedziemy z koksem')
 acc_doc = openpyxl.load_workbook('accounts.xlsx')
 acc_sheet = acc_doc.active
-cells = acc_sheet['A1': 'H7']
+cells = acc_sheet['A1': 'H10']
 
 while True:
     print('**************     start cycle    **************')

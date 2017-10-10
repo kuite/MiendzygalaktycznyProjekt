@@ -69,10 +69,9 @@ class Bot:
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
                     self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
                 else:
-
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.shared_cells, planet_info)
                     self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
-                self.collect_resources(self.mother_id, planet_info)
+                    self.collect_resources(self.mother_id, planet_info)
             else:
                 if planet_id == self.mother_id:
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
@@ -110,7 +109,7 @@ class Bot:
                 else:
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.shared_cells, planet_info)
                     self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
-                self.collect_resources(self.mother_id, planet_info)
+                    self.collect_resources(self.mother_id, planet_info)
             else:
                 if planet_id == self.mother_id:
                     self.send_expedition(planet_info)
@@ -126,7 +125,6 @@ class Bot:
 
     @staticmethod
     def check_anti_ballistic_missiles_on_main_planet(ogame):
-        # ogame = OGame(uni, login, password, server)
         mother_id = ogame.get_planet_by_name('Planeta matka')
 
         defense = ogame.get_defense(mother_id)
@@ -299,18 +297,18 @@ class Bot:
         lowest_request = 99999999999
         working_request = None
         for request in requests:
+            was_sent = request['sent']
             if request['requesting']['galaxy'] != mother_info.infos['coordinate']['galaxy'] or \
-                    self.login != request['login'] or self.uni != request['uni']:
+                    self.login != request['login'] or self.uni != request['uni'] or was_sent == 'true':
                 continue
 
             req_metal = request['metal']
             req_crystal = request['crystal']
             req_deuterium = request['deuterium']
             req_total_cost = req_metal + 2*req_crystal + 2.1*req_deuterium
-            was_sent = request['sent']
 
             # find lowest request
-            if req_total_cost < lowest_request or was_sent == 'true':
+            if req_total_cost < lowest_request:
                 working_request = request
                 break
 
@@ -341,7 +339,8 @@ class Bot:
             self.ogame.send_fleet(mother_info.id, ships, speed, where_to, mission, request_resources)
             res_req_db.remove(where('requesting') == working_request['requesting'] and
                               where('metal') == req_metal and
-                              where('crystal') == req_crystal)
+                              where('crystal') == req_crystal and
+                              where('uni') == self.uni)
             res_req_db.insert({'requesting': working_request['requesting'], 'metal': req_metal, 'crystal': req_crystal,
                                'deuterium': req_deuterium, 'building': working_request['building'],
                                'level': working_request['level'], 'login': self.login,
