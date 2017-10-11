@@ -332,6 +332,8 @@ class Bot:
         if metal > req_metal and crystal > req_crystal and deuterium > req_deuterium:
             dt_count = int(total_resources / 25000) + 1
             ships = [(Ships['LargeCargo'], dt_count)]
+            if mother_info.ships['large_cargo'] < dt_count:
+                return
             speed = Speed['100%']
             where_to = {'galaxy': working_request['requesting']['galaxy'],
                      'system': working_request['requesting']['system'],
