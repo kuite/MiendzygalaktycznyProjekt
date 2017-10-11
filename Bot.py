@@ -63,8 +63,9 @@ class Bot:
             start_time = datetime.now()
             self.check_minimum_large_cargos(planet_info)
             if planet_info.level > 95:
+                self.send_expedition(self.planet_infos[self.mother_id])
                 if planet_id == self.mother_id:
-                    self.send_expedition(planet_info)
+                    # self.send_expedition(planet_info)
                     self.check_defense_and_ships(planet_info)
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
                     self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
@@ -101,8 +102,9 @@ class Bot:
             print('Planet currently working: ' + planet_info.infos['planet_name'])
             self.check_defense_and_ships(planet_info)
             if planet_info.level > 90:
+                self.send_expedition(self.planet_infos[self.mother_id])
                 if planet_id == self.mother_id:
-                    self.send_expedition(planet_info)
+                    # self.send_expedition(planet_info)
                     self.check_defense_and_ships(planet_info)
                     self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
