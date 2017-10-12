@@ -22,16 +22,16 @@ techData = \
     }
 
 
-def calc_build_cost(tech_name, techLevel):
-    if techLevel < 1:
+def calc_build_cost(tech_name, tech_level):
+    if tech_level < 1:
         return [0, 0, 0]
     data = techData[tech_name]
     if data is None:
         return [0, 0, 0]
     cost = [0, 0, 0]
 
-    for i in range(2):
-        cost[i] = math.floor(data[i] * math.pow(data[3], (techLevel - 1)))
+    for i in range(3):
+        cost[i] = math.floor(data[i] * math.pow(data[3], (tech_level - 1)))
 
     return cost
 
