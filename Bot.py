@@ -1,11 +1,14 @@
-from ogame import OGame
+# from ogame import OGame
+# from ogame.constants import Ships, Speed, Facilities, Buildings, Research, Defense, Missions
+from pyogame.ogame import OGame
 from ogame.constants import Ships, Speed, Facilities, Buildings, Research, Defense, Missions
 import Utils
 import openpyxl
 from time import sleep
 import random
 from tinydb import TinyDB, Query, where
-from datetime import datetime
+from datetime import datetime, date
+from dateutil import parser
 
 
 class PlanetInfo:
@@ -77,8 +80,6 @@ class Bot:
                 if planet_id == self.mother_id:
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
                 else:
-                    if planet_info.level < 1:
-                        self.request_starter_resources(planet_info, self.res_req_db)
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.colony_cells, planet_info)
 
             time_elapsed = datetime.now() - start_time
@@ -113,8 +114,8 @@ class Bot:
                     self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
                     self.collect_resources(self.mother_id, planet_info)
             else:
+                self.send_expedition(self.planet_infos[self.mother_id])
                 if planet_id == self.mother_id:
-                    self.send_expedition(planet_info)
                     self.check_minimum_large_cargos(planet_info)
                     self.buildOnPlanetFromParsedXlsx(planet_id, self.mother_cells, planet_info)
                 else:
@@ -221,13 +222,13 @@ class Bot:
             ldl_count = 113 - ldl
             probes_count = 1 - probes
         if shipyard >= 8 and crystal_mine >= 19:
-            ldl_count = 200 - ldl
+            ldl_count = 1200 - ldl
+            gauss_count = 60
         if shipyard >= 8 and crystal_mine > 23 and int(facilities['missile_silo']) >= 2:
-            ldl_count = 500 - ldl
-            anti_rockets_count = 20 - anti_rockets
-            gauss_count = 20 - gauses
-            solars_count = 50 - solars
-            dt_count = 25 - dt
+            ldl_count = 1500 - ldl
+            gauss_count = 100 - gauses
+            solars_count = 150 - solars
+            dt_count = 15 - dt
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
@@ -289,30 +290,47 @@ class Bot:
 
     def send_resources_from_mother_if_possible(self, mother_info, res_req_db):
         # return #delete after
-        print('sending resources if possible from: '.format(mother_info.infos['planet_name']))
-        # check if there is pending request in database
-        # send all resources if have for whole request ONLY
         requests = res_req_db.all()
+        cooldowns = []
         # requests = None
         if requests is None:
             return
         lowest_request = 99999999999
         working_request = None
         for request in requests:
-            was_sent = request['sent']
+            is_planet_on_cooldown = False
+            for cooldown in cooldowns:
+                galaxy = cooldown['galaxy']
+                system = cooldown['system']
+                planet = cooldown['position']
+                if request['requesting']['galaxy'] == galaxy and \
+                                request['requesting']['system'] == system and \
+                                request['requesting']['position'] == planet:
+                    is_planet_on_cooldown = True
+
             if request['requesting']['galaxy'] != mother_info.infos['coordinate']['galaxy'] or \
-                    self.login != request['login'] or self.uni != request['uni'] or was_sent == 'true':
+                            self.login != request['login'] or \
+                            self.uni != request['uni'] or is_planet_on_cooldown:
                 continue
+
+            sent_date = request['sent_time']
+            was_sent = request['sent']
+            if was_sent == 'true' and sent_date is not None:
+                parsed_time = parser.parse(sent_date)
+                delta = datetime.now() - parsed_time
+                delta_hours = delta.seconds / (60*60)
+                if delta_hours < 10:
+                    cooldowns.append(request['requesting'])
+                    continue
 
             req_metal = request['metal']
             req_crystal = request['crystal']
             req_deuterium = request['deuterium']
-            req_total_cost = req_metal + 2*req_crystal + 2.1*req_deuterium
+            req_total_cost = req_metal + req_crystal + 1.9*req_deuterium
 
             # find lowest request
             if req_total_cost < lowest_request:
                 working_request = request
-                break
 
         if working_request is None:
             return
@@ -348,7 +366,7 @@ class Bot:
             res_req_db.insert({'requesting': working_request['requesting'], 'metal': req_metal, 'crystal': req_crystal,
                                'deuterium': req_deuterium, 'building': working_request['building'],
                                'level': working_request['level'], 'login': self.login,
-                               'uni': self.uni, 'sent': 'true'})
+                               'uni': self.uni, 'sent': 'true', 'sent_time': str(datetime.now())})
             print('-> sending resources from mother to: ' + str(where_to))
 
     def collect_resources(self, mother_id, planet_info):
@@ -402,7 +420,6 @@ class Bot:
         exst_req = res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
         if exst_req is None:
             return
-        # print('DEBUG: len(exst_req)')
         if len(exst_req) > 0:
             return
         # print('DEBUG: for c1, c2, c3 in shared_cells:')
@@ -419,7 +436,7 @@ class Bot:
                 continue
             res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
                                'deuterium': cost[2], 'building': building, 'level': level, 'login': self.login,
-                               'uni': self.uni, 'sent': 'false'})
+                               'uni': self.uni, 'sent': 'false', 'sent_time': None})
 
     def build_next_build(self, planet_info, shared_cells):
         pass
