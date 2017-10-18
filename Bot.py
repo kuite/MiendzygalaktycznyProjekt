@@ -297,7 +297,9 @@ class Bot:
         for request in requests:
             requesting_id = request['requesting_id']
             was_sent = request['sent']
-            if was_sent == 'true' or len(self.planet_infos[requesting_id].planet_overview['buildings']) > 0:
+            if request['login'] != self.login or request['uni'] != self.uni:
+                continue
+            if was_sent == 'true' or len(self.ogame.get_overview(requesting_id)['buildings']) > 0:
                 continue
             req_metal = request['metal']
             req_crystal = request['crystal']
@@ -318,7 +320,6 @@ class Bot:
         req_level = working_request['level']
         total_required_resources = req_metal + req_crystal + req_deuterium
 
-        # check if building is more advanced than on mother if yes return someday
         metal = mother_info.resources['metal']
         crystal = mother_info.resources['crystal']
         deuterium = mother_info.resources['deuterium']
