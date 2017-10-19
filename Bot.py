@@ -259,7 +259,7 @@ class Bot:
                 defense_objects_count = int(c2.value) - int(defense[c1.value])
                 print('DEBUG: building defense: ' + c1.value + " in number of: " + str(defense_objects_count))
                 self.ogame.build(planet_id, (Defense[c3.value], defense_objects_count))
-                return
+                # return
             elif c1.value in ships and ships[c1.value] < c2.value:
                 if len(planetInfo.planet_overview['shipyard']) > 0:
                     continue
@@ -268,25 +268,25 @@ class Bot:
                     continue
                 print('DEBUG: building ship: ' + c1.value + " in number of: " + str(ships_count))
                 self.ogame.build(planet_id, (Ships[c3.value], ships_count))
-                return
+                # return
             elif c1.value in planetInfo.resources_buildings and planetInfo.resources_buildings[c1.value] < c2.value:
                 if len(planetInfo.planet_overview['buildings']) > 0:
                     continue
                 print('DEBUG: building build: ' + c1.value + ' on level: ' + str(c2.value))
                 self.ogame.build(planet_id, Buildings[c3.value])
-                return
+                # return
             elif c1.value in planetInfo.facilities and planetInfo.facilities[c1.value] < c2.value:
                 if len(planetInfo.planet_overview['buildings']) > 0:
                     continue
                 print('DEBUG: building facilities: ' + c1.value + ' on level: ' + str(c2.value))
                 self.ogame.build(planet_id, Facilities[c3.value])
-                return
+                # return
             elif c1.value in researches and researches[c1.value] < c2.value:
                 if len(planetInfo.planet_overview['research']) > 0:
                     continue
                 print('DEBUG: building technology: ' + c1.value + ' on level: ' + str(c2.value))
                 self.ogame.build(planet_id, Research[c3.value])
-                return
+                # return
 
     def send_resources_from_mother_if_possible(self, mother_info, res_req_db):
         requests = res_req_db.all()
@@ -297,7 +297,8 @@ class Bot:
         for request in requests:
             requesting_id = request['requesting_id']
             was_sent = request['sent']
-            if request['login'] != self.login or request['uni'] != self.uni:
+            if request['login'] != self.login or request['uni'] != self.uni or \
+                            request['requesting']['galaxy'] != mother_info.infos['coordinate']['galaxy']:
                 continue
             if was_sent == 'true' or len(self.ogame.get_overview(requesting_id)['buildings']) > 0:
                 continue
@@ -308,6 +309,7 @@ class Bot:
 
             # find lowest request
             if req_total_cost < lowest_request:
+                lowest_request = req_total_cost
                 working_request = request
 
         if working_request is None:
