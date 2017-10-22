@@ -12,7 +12,6 @@ from dateutil import parser
 
 
 class PlanetInfo:
-
     def __init__(self, planet_id, ogame):
         self.id = planet_id
         self.resources = ogame.get_resources(planet_id)
@@ -30,6 +29,7 @@ class PlanetInfo:
 
 class Bot:
     def __init__(self, login, password, server, uni):
+        self.collaborate_minimum_level = 75
         self.login = login
         self.password = password
         self.server = server
@@ -47,11 +47,11 @@ class Bot:
 
         colony_doc = openpyxl.load_workbook('colony_planet_build.xlsx')
         colony_sheet = colony_doc.active
-        self.colony_cells = colony_sheet['A1': 'C200']
+        self.colony_cells = colony_sheet['A1': 'C139']
 
         mother_doc = openpyxl.load_workbook('first_planet_build.xlsx')
         mother_sheet = mother_doc.active
-        self.mother_cells = mother_sheet['A1': 'C250']
+        self.mother_cells = mother_sheet['A1': 'C185']
 
         shared_doc = openpyxl.load_workbook('shared_build.xlsx')
         shared_sheet = shared_doc.active
@@ -64,23 +64,26 @@ class Bot:
             planet_id = planet_info.id
             print('p Planet currently working: ' + planet_info.infos['planet_name'])
             start_time = datetime.now()
-            self.check_minimum_large_cargos(planet_info)
-            if planet_info.level > 95:
-                self.send_expedition(self.planet_infos[self.mother_id])
-                if planet_id == self.mother_id:
-                    # self.send_expedition(planet_info)
-                    self.check_defense_and_ships(planet_info)
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-                    self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
-                else:
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.shared_cells, planet_info)
-                    self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
-                    self.collect_resources(self.mother_id, planet_info)
+            # if planet_info.level > 95:
+            #     self.send_expedition(self.planet_infos[self.mother_id])
+            #     if planet_id == self.mother_id:
+            #         # self.send_expedition(planet_info)
+            #         self.check_mother_defense_and_ships(planet_info)
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
+            #         self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
+            #     else:
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.shared_cells, planet_info)
+            #         self.request_resources_for_next_build_old(planet_info, self.res_req_db, self.shared_cells)
+            #         self.collect_resources(self.mother_id, planet_info)
+            # else:
+            #     if planet_id == self.mother_id:
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
+            #     else:
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.colony_cells, planet_info)
+            if planet_id == self.mother_id:
+                self.develop_mother_planet(planet_info, self.mother_cells)
             else:
-                if planet_id == self.mother_id:
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-                else:
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.colony_cells, planet_info)
+                self.develop_colony_planet(planet_info, self.colony_cells)
 
             time_elapsed = datetime.now() - start_time
             sleep_time = random.uniform(0.5, 1.3)
@@ -101,25 +104,30 @@ class Bot:
         for planet_info in self.planet_infos.values():
             planet_id = planet_info.id
             print('Planet currently working: ' + planet_info.infos['planet_name'])
-            self.check_defense_and_ships(planet_info)
-            if planet_info.level > 90:
-                self.send_expedition(self.planet_infos[self.mother_id])
-                if planet_id == self.mother_id:
-                    # self.send_expedition(planet_info)
-                    self.check_defense_and_ships(planet_info)
-                    self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-                else:
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.shared_cells, planet_info)
-                    self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
-                    self.collect_resources(self.mother_id, planet_info)
+            # self.check_mother_defense_and_ships(planet_info)
+            # if planet_info.level > 90:
+            #     self.send_expedition(self.planet_infos[self.mother_id])
+            #     if planet_id == self.mother_id:
+            #         # self.send_expeditions(planet_info)
+            #         self.check_mother_defense_and_ships(planet_info)
+            #         self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
+            #     else:
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.shared_cells, planet_info)
+            #         self.request_resources_for_next_build_old(planet_info, self.res_req_db, self.shared_cells)
+            #         self.collect_resources(self.mother_id, planet_info)
+            # else:
+            #     self.send_expedition(self.planet_infos[self.mother_id])
+            #     if planet_id == self.mother_id:
+            #         # self.check_minimum_large_cargos(planet_info)
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
+            #     else:
+            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.colony_cells, planet_info)
+
+            if planet_id == self.mother_id:
+                self.develop_mother_planet(planet_info, self.mother_cells)
             else:
-                self.send_expedition(self.planet_infos[self.mother_id])
-                if planet_id == self.mother_id:
-                    # self.check_minimum_large_cargos(planet_info)
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-                else:
-                    self.build_on_planet_from_parsed_xlsx(planet_id, self.colony_cells, planet_info)
+                self.develop_colony_planet(planet_info, self.colony_cells)
 
             sleep_time = random.uniform(0.5, 1.4)
             sleep(sleep_time)
@@ -136,10 +144,21 @@ class Bot:
             print('##### ALERT!! REBUILDING ROCKET DEFENSE: ' + defend_rockets)
             ogame.build(mother_id, (Defense['AntiBallisticMissiles'], 70))
 
-    def develop_colony_planet(self, planet_info):
-        self.build_on_planet_from_parsed_xlsx(planet_info.id, self.shared_cells, planet_info)
-        self.request_resources_for_next_build(planet_info, self.res_req_db, self.shared_cells)
-        self.collect_resources(self.mother_id, planet_info)
+    def develop_colony_planet(self, planet_info, colony_cells):
+        self.check_colony_def_ships(planet_info)
+        next_build = self.get_next_build(planet_info, colony_cells)
+        self.build_on_planet(planet_info, next_build)
+        if planet_info.level > self.collaborate_minimum_level:
+            self.request_resources_for_next_build(planet_info, next_build)
+            self.collect_resources(self.mother_id, planet_info)
+
+    def develop_mother_planet(self, mother_info, mother_cells):
+        self.check_mother_defense_and_ships(mother_info)
+        self.send_expeditions(mother_info)
+        next_build = self.get_next_build(mother_info, mother_cells)
+        self.build_on_planet(mother_info, next_build)
+        if mother_info.level > self.collaborate_minimum_level:
+            self.send_resources_from_mother_if_possible(mother_info, self.res_req_db)
 
     def colonize_planet_eco(self, planet_info):
         if planet_info.ships['colony_ship'] < 1:
@@ -149,7 +168,8 @@ class Bot:
             return
         mother_coordinates = planet_info.infos['coordinate']
         start_galaxy = mother_coordinates['galaxy']
-        start_system = mother_coordinates['system']
+        # start_system = mother_coordinates['system']
+        start_system = random.randint(100, 400)
         resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
         slots = [11, 10, 9, 8, 7, 6, 5]
         current_system = start_system
@@ -175,6 +195,37 @@ class Bot:
             if system_step > 50:
                 return
 
+    def build_on_planet(self, planet_info, build_info):
+        if build_info is None:
+            return
+        researches = self.researches
+        resources_buildings = planet_info.resources_buildings
+        civilian_buildings = planet_info.facilities
+
+        if build_info[0] == '':
+            return
+        elif build_info[0] in resources_buildings and resources_buildings[build_info[0]] < build_info[1]:
+            self.ogame.build(planet_info.id, Buildings[build_info[2]])
+        elif build_info[0] in civilian_buildings and civilian_buildings[build_info[0]] < build_info[1]:
+            self.ogame.build(planet_info.id, Facilities[build_info[2]])
+        elif build_info[0] in researches and researches[build_info[0]] < build_info[1]:
+            self.ogame.build(planet_info.id, Research[build_info[2]])
+
+    def get_next_build(self, planet_info, build_cells):
+        researches = self.researches
+        resources_buildings = planet_info.resources_buildings
+        civilian_buildings = planet_info.facilities
+
+        for c1, c2, c3 in build_cells:
+            if c1.value == '':
+                return
+            elif c1.value in resources_buildings and resources_buildings[c1.value] < c2.value:
+                return [c1.value, c2.value, c3.value]
+            elif c1.value in civilian_buildings and civilian_buildings[c1.value] < c2.value:
+                return [c1.value, c2.value, c3.value]
+            elif c1.value in researches and researches[c1.value] < c2.value:
+                return [c1.value, c2.value, c3.value]
+
     def check_minimum_large_cargos(self, planet_info):
         if len(planet_info.planet_overview['shipyard']) > 0:
             return
@@ -190,7 +241,56 @@ class Bot:
         if dt < dt_count:
             self.ogame.build(planet_info.id, (Ships['LargeCargo'], dt_count - dt))
 
-    def check_defense_and_ships(self, planet_info):
+    def check_colony_def_ships(self, planet_info):
+        if len(planet_info.planet_overview['shipyard']) > 0:
+            return
+
+        defense = planet_info.defense
+        ships = planet_info.ships
+        facilities = planet_info.facilities
+        planet_id = planet_info.id
+
+        silos_level = int(facilities['missile_silo'])
+        ldl = int(defense['light_laser'])
+        gauses = int(defense['gauss_cannon'])
+        solars = int(ships['solar_satellite'])
+        probes = int(ships['espionage_probe'])
+        dt = int(ships['large_cargo'])
+        shipyard = int(facilities['shipyard'])
+
+        ldl_count = 0
+        anti_rockets_count = 0
+        gauss_count = 0
+        solars_count = 0
+        probes_count = 0
+        dt_count = 0
+
+        if planet_info.level > 75:
+            dt_count = 10 - dt
+            probes_count = 1 - probes
+            ldl_count = 200 - ldl
+        if shipyard >= 8 and planet_info.level > 80:
+            ldl_count = 500 - ldl
+            gauss_count = 20 - gauses
+            solars_count = 100 - solars
+            dt_count = 20 - dt
+        if silos_level >= 2:
+            anti_rockets_count = silos_level * 10
+
+        if anti_rockets_count > 0:
+            self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
+        if gauss_count > 0:
+            self.ogame.build(planet_id, (Defense['GaussCannon'], gauss_count))
+        if ldl_count > 0:
+            self.ogame.build(planet_id, (Defense['LightLaser'], ldl_count))
+        if solars_count > 0:
+            self.ogame.build(planet_id, (Ships['SolarSatellite'], solars_count))
+        if probes_count > 0:
+            self.ogame.build(planet_id, (Ships['EspionageProbe'], probes_count))
+        if dt_count > 0 and probes_count > 0:
+            self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
+
+    def check_mother_defense_and_ships(self, planet_info):
         if len(planet_info.planet_overview['shipyard']) > 0:
             return
 
@@ -227,10 +327,10 @@ class Bot:
             probes_count = 1 - probes
         if shipyard >= 8 and crystal_mine >= 19:
             ldl_count = 1200 - ldl
-            gauss_count = 60
+            gauss_count = 30
         if shipyard >= 8 and crystal_mine > 23:
             ldl_count = 1000 - ldl
-            gauss_count = 100 - gauses
+            gauss_count = 50 - gauses
             solars_count = 150 - solars
             dt_count = 15 - dt
         if silos_level >= 2:
@@ -291,7 +391,7 @@ class Bot:
             req_metal = request['metal']
             req_crystal = request['crystal']
             req_deuterium = request['deuterium']
-            req_total_cost = req_metal + req_crystal + 1.9*req_deuterium
+            req_total_cost = req_metal + req_crystal + 1.4*req_deuterium
 
             # find lowest request
             if req_total_cost < lowest_request:
@@ -381,7 +481,32 @@ class Bot:
         self.ogame.send_fleet(planet_info.id, ships, speed, where, mission, resources)
         print('send expedition from mother to: {}'.format(where))
 
-    def request_resources_for_next_build(self, planet_info, res_req_db, shared_cells):
+    def send_expeditions(self, planet_info):
+        mother_coordinates = planet_info.infos['coordinate']
+        galaxy = mother_coordinates['galaxy']
+        system = mother_coordinates['system']
+        for i in (1, 2, 3):
+            system_delta = random.randint(-5, 5)
+            dt_count = 0
+
+            if planet_info.level > 70:
+                dt_count = 5
+            if planet_info.level > 80:
+                dt_count = 15
+            if planet_info.level > 95:
+                dt_count = 100
+            if planet_info.level > 100:
+                dt_count = 250
+
+            ships = [(Ships['EspionageProbe'], 1), (Ships['LargeCargo'], dt_count)]
+            speed = Speed['100%']
+            where = {'galaxy': galaxy, 'system': system + system_delta, 'position': 16}
+            mission = Missions['Expedition']
+            resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
+            self.ogame.send_fleet(planet_info.id, ships, speed, where, mission, resources)
+            print('attemp {}: send expedition from mother to: {}'.format(i, where))
+
+    def request_resources_for_next_build_old(self, planet_info, res_req_db, shared_cells):
         exst_req = res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
         if exst_req is None:
             return
@@ -402,6 +527,23 @@ class Bot:
             res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
                                'deuterium': cost[2], 'building': building, 'level': level, 'login': self.login,
                                'uni': self.uni, 'sent': 'false', 'requesting_id': planet_info.id})
+
+    def request_resources_for_next_build(self, planet_info, next_build):
+        exst_req = self.res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
+        if exst_req is None:
+            return
+        if len(exst_req) > 0:
+            return
+        if next_build[0] is None or next_build[0] == '' or next_build[0] == 'solar_satellite':
+            return
+
+        cost = Utils.calc_build_cost(next_build[0], next_build[1])
+        building = next_build[0]
+        level = next_build[1]
+
+        self.res_req_db.insert({'requesting': planet_info.infos['coordinate'], 'metal': cost[0], 'crystal': cost[1],
+                           'deuterium': cost[2], 'building': building, 'level': level, 'login': self.login,
+                           'uni': self.uni, 'sent': 'false', 'requesting_id': planet_info.id})
 
     def build_next_build(self, planet_info, shared_cells):
         pass
