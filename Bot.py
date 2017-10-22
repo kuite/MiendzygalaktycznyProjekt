@@ -266,8 +266,8 @@ class Bot:
         probes_count = 0
         dt_count = 0
 
-        if planet_info.level > 75:
-            dt_count = 10 - dt
+        if planet_info.level > self.collaborate_minimum_level:
+            dt_count = 15 - dt
             probes_count = 1 - probes
             ldl_count = 200 - ldl
         if shipyard >= 8 and planet_info.level > 80:
@@ -319,21 +319,22 @@ class Bot:
         probes_count = 0
         dt_count = 0
 
-        if planet_info.level > 75:
-            dt_count = 5 - dt
+        if planet_info.level > self.collaborate_minimum_level:
+            dt_count = 15 - dt
             probes_count = 1 - probes
 
         if crystal_mine > 15:
             ldl_count = 113 - ldl
             probes_count = 1 - probes
-        if shipyard >= 8 and crystal_mine >= 19:
+        if shipyard >= 8 and planet_info.level > 80:
             ldl_count = 1200 - ldl
             gauss_count = 30
-        if shipyard >= 8 and crystal_mine > 23:
+            dt_count = 45 - dt
+        if shipyard >= 8 and planet_info.level > 90:
             ldl_count = 1000 - ldl
             gauss_count = 50 - gauses
             solars_count = 150 - solars
-            dt_count = 15 - dt
+            dt_count = 80 - dt
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
