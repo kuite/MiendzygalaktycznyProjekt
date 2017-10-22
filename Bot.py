@@ -149,7 +149,8 @@ class Bot:
         next_build = self.get_next_build(planet_info, colony_cells)
         self.build_on_planet(planet_info, next_build)
         if planet_info.level > self.collaborate_minimum_level:
-            self.request_resources_for_next_build(planet_info, next_build)
+            if len(planet_info.planet_overview['buildings']) == 0:
+                self.request_resources_for_next_build(planet_info, next_build)
             self.collect_resources(self.mother_id, planet_info)
 
     def develop_mother_planet(self, mother_info, mother_cells):
