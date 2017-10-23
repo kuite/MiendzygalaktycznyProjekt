@@ -13,13 +13,15 @@ from datetime import datetime
 print('jedziemy z koksem')
 acc_doc = openpyxl.load_workbook('accounts.xlsx')
 acc_sheet = acc_doc.active
-cells = acc_sheet['A1': 'H10']
+cells = acc_sheet['A1': 'H20']
 
 while True:
     print('**************     start cycle    **************')
     startTime = datetime.now()
     for a, b, c, d, e, f, g, h in cells:
         try:
+            if a.value == "":
+                continue
             start_time = datetime.now()
             login = a.value
             password = b.value
