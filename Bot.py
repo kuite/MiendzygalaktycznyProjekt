@@ -249,6 +249,8 @@ class Bot:
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
+        if dt_count > 0 and probes_count > 0:
+            self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
         if anti_rockets_count > 0:
             self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
         if gauss_count > 0:
@@ -259,8 +261,6 @@ class Bot:
             self.ogame.build(planet_id, (Ships['SolarSatellite'], solars_count))
         if probes_count > 0:
             self.ogame.build(planet_id, (Ships['EspionageProbe'], probes_count))
-        if dt_count > 0 and probes_count > 0:
-            self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
 
     def check_mother_defense_and_ships(self, planet_info):
         if len(planet_info.planet_overview['shipyard']) > 0:
@@ -299,7 +299,7 @@ class Bot:
             probes_count = 1 - probes
         if shipyard >= 8 and planet_info.level > 80:
             ldl_count = 1200 - ldl
-            gauss_count = 30
+            gauss_count = 30 - gauses
             dt_count = 45 - dt
         if shipyard >= 8 and planet_info.level > 90:
             ldl_count = 1000 - ldl
@@ -312,6 +312,7 @@ class Bot:
         if anti_rockets_count > 0:
             self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
         if gauss_count > 0:
+            print('DEBUG: building gauss cannon in number of: {}'.format(gauss_count))
             self.ogame.build(planet_id, (Defense['GaussCannon'], gauss_count))
         if ldl_count > 0:
             self.ogame.build(planet_id, (Defense['LightLaser'], ldl_count))
