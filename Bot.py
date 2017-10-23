@@ -64,26 +64,14 @@ class Bot:
             planet_id = planet_info.id
             print('p Planet currently working: ' + planet_info.infos['planet_name'])
             start_time = datetime.now()
-            # if planet_info.level > 95:
-            #     self.send_expedition(self.planet_infos[self.mother_id])
-            #     if planet_id == self.mother_id:
-            #         # self.send_expedition(planet_info)
-            #         self.check_mother_defense_and_ships(planet_info)
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-            #         self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
-            #     else:
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.shared_cells, planet_info)
-            #         self.request_resources_for_next_build_old(planet_info, self.res_req_db, self.shared_cells)
-            #         self.collect_resources(self.mother_id, planet_info)
-            # else:
-            #     if planet_id == self.mother_id:
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-            #     else:
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.colony_cells, planet_info)
-            if planet_id == self.mother_id:
-                self.develop_mother_planet(planet_info, self.mother_cells)
-            else:
-                self.develop_colony_planet(planet_info, self.colony_cells)
+            try:
+                if planet_id == self.mother_id:
+                    self.develop_mother_planet(planet_info, self.mother_cells)
+                else:
+                    self.develop_colony_planet(planet_info, self.colony_cells)
+            except Exception as e:
+                print('-----======------- Error happend in start_def -----======-------')
+                print(e)
 
             time_elapsed = datetime.now() - start_time
             sleep_time = random.uniform(0.5, 1.3)
@@ -104,31 +92,14 @@ class Bot:
         for planet_info in self.planet_infos.values():
             planet_id = planet_info.id
             print('Planet currently working: ' + planet_info.infos['planet_name'])
-            # self.check_mother_defense_and_ships(planet_info)
-            # if planet_info.level > 90:
-            #     self.send_expedition(self.planet_infos[self.mother_id])
-            #     if planet_id == self.mother_id:
-            #         # self.send_expeditions(planet_info)
-            #         self.check_mother_defense_and_ships(planet_info)
-            #         self.send_resources_from_mother_if_possible(planet_info, self.res_req_db)
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-            #     else:
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.shared_cells, planet_info)
-            #         self.request_resources_for_next_build_old(planet_info, self.res_req_db, self.shared_cells)
-            #         self.collect_resources(self.mother_id, planet_info)
-            # else:
-            #     self.send_expedition(self.planet_infos[self.mother_id])
-            #     if planet_id == self.mother_id:
-            #         # self.check_minimum_large_cargos(planet_info)
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.mother_cells, planet_info)
-            #     else:
-            #         self.build_on_planet_from_parsed_xlsx(planet_id, self.colony_cells, planet_info)
-
-            if planet_id == self.mother_id:
-                self.develop_mother_planet(planet_info, self.mother_cells)
-            else:
-                self.develop_colony_planet(planet_info, self.colony_cells)
-
+            try:
+                if planet_id == self.mother_id:
+                    self.develop_mother_planet(planet_info, self.mother_cells)
+                else:
+                    self.develop_colony_planet(planet_info, self.colony_cells)
+            except Exception as e:
+                print('-----======------- Error happend in  start_eco -----======-------')
+                print(e)
             sleep_time = random.uniform(0.5, 1.4)
             sleep(sleep_time)
             print('p Planet {} handling finished, random sleep time: {}[ms]'.
@@ -531,6 +502,8 @@ class Bot:
                                'uni': self.uni, 'sent': 'false', 'requesting_id': planet_info.id})
 
     def request_resources_for_next_build(self, planet_info, next_build):
+        if next_build is None:
+            return
         exst_req = self.res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
         if exst_req is None:
             return
