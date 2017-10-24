@@ -43,10 +43,10 @@ for a, b, c, d, e, f, g, h in cells:
         time_elapsed = datetime.now() - start_time
         print('Time elapsed for {} is {}[hh:mm:ss.ms]'.format(login, time_elapsed))
 
-    timeElapsed = datetime.now() - startTime
-    wait_time = random.uniform(1200, 1400)
-    print('{}: **************     ENDED CHECKING ALL ECO ACCOUNTS: elapsed cycle time: {}[hh:mm:ss.ms], '
-          'defend time: {:6.2f}[m]'.format(datetime.now(), timeElapsed, wait_time/60))
+timeElapsed = datetime.now() - startTime
+wait_time = random.uniform(1200, 1400)
+print('{}: **************     ENDED CHECKING ALL ECO ACCOUNTS: elapsed cycle time: {}[hh:mm:ss.ms], '
+      'defend time: {:6.2f}[m]'.format(datetime.now(), timeElapsed, wait_time/60))
     # sleep(wait_time)
     # if (datetime.now() - begin_bot_time).seconds/60 > 50:
     #     begin_bot_time = datetime.now()
