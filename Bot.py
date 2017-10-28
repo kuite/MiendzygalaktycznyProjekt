@@ -54,27 +54,19 @@ class Bot:
 
         self.res_req_db = TinyDB('resources_requests.json')
 
-    def start_def(self):
+    def start_supplier(self):
         for planet_info in self.planet_infos.values():
             planet_id = planet_info.id
-            print('p Planet currently working: ' + planet_info.infos['planet_name'])
-            start_time = datetime.now()
+            print('Planet currently working: {}, planet id: {}'.format(planet_info.infos['planet_name'], planet_id))
             try:
-                if planet_id == self.mother_id:
-                    self.develop_mother_planet(planet_info, self.mother_cells)
-                else:
-                    self.develop_colony_planet(planet_info, self.colony_cells)
+                self.develop_supplier_planet(planet_info)
             except Exception as e:
                 print('-----======------- Error happend in start_def -----======-------')
                 print(e)
+            print('p Planet {} handling finished'.format(planet_info.infos['planet_name']))
 
-            time_elapsed = datetime.now() - start_time
-            sleep_time = random.uniform(0.5, 1.3)
-            print('p Planet handling time elapsed {}, random sleep time: {}[ms]'.format(time_elapsed, sleep_time))
-            sleep(sleep_time)
-
-    def start_fleet(self):
-        pass
+    # def start_supplier(self):
+    #     pass
 
     def start_eco(self):
         planets = self.planets
@@ -89,7 +81,7 @@ class Bot:
             print('Planet currently working: {}, planet id: {}'.format(planet_info.infos['planet_name'], planet_id))
             try:
                 if planet_id == self.mother_id:
-                    print('s: function: {}'.format('self.develop_colony_planet(planet_info, self.colony_cells)'))
+                    print('s: function: {}'.format('self.develop_mother_planet(planet_info, self.colony_cells)'))
                     self.develop_mother_planet(planet_info, self.mother_cells)
                     print('e: function: {}'.format('self.develop_mother_planet(planet_info, self.mother_cells)'))
                 else:
@@ -99,10 +91,7 @@ class Bot:
             except Exception as e:
                 print('-----======------- Error happend in  start_eco -----======-------')
                 print(e)
-            sleep_time = random.uniform(0.5, 1.4)
-            sleep(sleep_time)
-            print('p Planet {} handling finished, random sleep time: {}[ms]'.
-                  format(planet_info.infos['planet_name'], sleep_time))
+            print('p Planet {} handling finished'.format(planet_info.infos['planet_name']))
 
     @staticmethod
     def check_anti_ballistic_missiles_on_main_planet(ogame):
@@ -113,6 +102,14 @@ class Bot:
         if defend_rockets < 50:
             print('##### ALERT!! REBUILDING ROCKET DEFENSE: ' + defend_rockets)
             ogame.build(mother_id, (Defense['AntiBallisticMissiles'], 70))
+
+    def develop_supplier_planet(self, planet_info):
+        ships = planet_info.ships
+        dt = int(ships['large_cargo'])
+        if dt > 49:
+            self.send_expedition(planet_info)
+        self.check_supplier_ships(planet_info)
+        self.push_to_planet(self.mother_id, planet_info)
 
     def develop_colony_planet(self, planet_info, colony_cells):
         self.check_colony_def_ships(planet_info)
@@ -220,20 +217,24 @@ class Bot:
         solars_count = 0
         probes_count = 0
         dt_count = 0
+        build_dt = False
 
+        if probes < 1 and dt < 50:
+            build_dt = True
+        if dt > 49:
+            probes_count = 1
         if planet_info.level > self.collaborate_minimum_level:
             dt_count = 15 - dt
-            probes_count = 1 - probes
             ldl_count = 200 - ldl
         if shipyard >= 8 and planet_info.level > 80:
             ldl_count = 500 - ldl
             gauss_count = 20 - gauses
             solars_count = 50 - solars
-            dt_count = 20 - dt
+            dt_count = 30 - dt
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
-        if dt_count > 0 and planet_info.resources['crystal'] > 30000 and planet_info.resources['metal'] > 30000:
+        if build_dt is True:
             self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
         if anti_rockets_count > 0:
             self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
@@ -243,6 +244,31 @@ class Bot:
             self.ogame.build(planet_id, (Defense['LightLaser'], ldl_count))
         if solars_count > 0:
             self.ogame.build(planet_id, (Ships['SolarSatellite'], solars_count))
+        if probes_count > 0:
+            self.ogame.build(planet_id, (Ships['EspionageProbe'], probes_count))
+
+    def check_supplier_ships(self, planet_info):
+        ships = planet_info.ships
+        planet_id = planet_info.id
+        defense = planet_info.defense
+
+        probes = int(ships['espionage_probe'])
+        dt = int(ships['large_cargo'])
+
+        ldl_count = 0
+        anti_rockets_count = 0
+        gauss_count = 0
+        solars_count = 0
+        probes_count = 0
+        dt_count = 0
+
+        if probes < 1 and dt < 50:
+            dt_count = 50 - dt
+        if dt > 49:
+            probes_count = 1
+
+        if dt_count > 0:
+            self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
         if probes_count > 0:
             self.ogame.build(planet_id, (Ships['EspionageProbe'], probes_count))
 
@@ -408,6 +434,24 @@ class Bot:
             self.ogame.send_fleet(planet_info.id, ships, speed, where, mission, resources)
             print('collect_resources from: ' + planet_info.infos['planet_name'] + ' to mother planet')
 
+    def push_to_planet(self, mother_id, planet_info):
+        dt = planet_info.ships['large_cargo']
+        capacity = dt * 25000
+        resources = planet_info.resources['metal'] + \
+                    planet_info.resources['crystal'] + \
+                    planet_info.resources['deuterium']
+        if resources > capacity * 0.75 and dt > 5:
+            ships = [(Ships['LargeCargo'], 9999)]
+            speed = Speed['100%']
+            where = self.planet_infos[mother_id].infos['coordinate']
+            where['galaxy'] = 5
+            where['system'] = 186
+            where['planet'] = 8
+            mission = Missions['Transport']
+            resources = {'metal': 999999999, 'crystal': 99999999, 'deuterium': 99999999}
+            self.ogame.send_fleet(planet_info.id, ships, speed, where, mission, resources)
+            print('collect_resources from: {} to: {}'.format(planet_info.infos['planet_name'], str(where)))
+
     def request_starter_resources(self, planet_info, res_req_db):
         exst_req = res_req_db.search(Query().requesting == planet_info.infos['coordinate'])
         if len(exst_req) > 0:
@@ -421,16 +465,7 @@ class Bot:
         galaxy = mother_coordinates['galaxy']
         system = mother_coordinates['system']
         system_delta = random.randint(-5, 5)
-        dt_count = 0
-
-        if planet_info.level > 70:
-            dt_count = 5
-        if planet_info.level > 80:
-            dt_count = 15
-        if planet_info.level > 95:
-            dt_count = 100
-        if planet_info.level > 100:
-            dt_count = 250
+        dt_count = 10
 
         ships = [(Ships['EspionageProbe'], 1), (Ships['LargeCargo'], dt_count)]
         speed = Speed['100%']

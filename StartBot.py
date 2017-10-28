@@ -1,12 +1,6 @@
 from Bot import Bot
-from ogame import OGame
 import openpyxl
-import time
-from random import randint
-from time import sleep
-import itertools
-import random
-import datetime
+
 from datetime import datetime
 import sys
 
@@ -30,19 +24,16 @@ try:
     print('**************     start bot for {}   **************'.format(login))
     start_time = datetime.now()
     try:
-        print('login : ' + login)
-        print('server : ' + server)
-        print('uni : ' + uni)
+        print('login : {}'.format(login))
+        print('server : {}'.format(server))
+        print('uni : {}'.format(uni))
+        print('mode: {}'.format(mode))
         if mode == 'supplier':
-            print('supplier mode on')
-            # bot = Bot(login, password, server, uni)
-            # bot.start_supplier()
+            bot = Bot(login, password, server, uni)
+            bot.start_supplier()
         if mode == 'eco':
             bot = Bot(login, password, server, uni)
             bot.start_eco()
-        if mode == 'def':
-            bot = Bot(login, password, server, uni)
-            bot.start_def()
     except Exception as e:
         print('-----======------- Error happend in bot -----======-------')
         print(e)

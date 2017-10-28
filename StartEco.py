@@ -36,7 +36,7 @@ try:
             print('uni : ' + uni)
 
             bot = Bot(login, password, server, uni)
-            bot.start_eco()
+            bot.start_supplier()
         except Exception as e:
             print('-----======------- Error happend in bot -----======-------')
             print(e)
