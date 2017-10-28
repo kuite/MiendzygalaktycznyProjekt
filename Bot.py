@@ -29,7 +29,7 @@ class PlanetInfo:
 
 class Bot:
     def __init__(self, login, password, server, uni):
-        self.collaborate_minimum_level = 75
+        self.collaborate_minimum_level = 65
         self.login = login
         self.password = password
         self.server = server
@@ -52,10 +52,6 @@ class Bot:
         mother_doc = openpyxl.load_workbook('first_planet_build.xlsx')
         mother_sheet = mother_doc.active
         self.mother_cells = mother_sheet['A1': 'C185']
-
-        shared_doc = openpyxl.load_workbook('shared_build.xlsx')
-        shared_sheet = shared_doc.active
-        self.shared_cells = shared_sheet['A1': 'C200']
 
         self.res_req_db = TinyDB('resources_requests.json')
 
@@ -198,21 +194,6 @@ class Bot:
             elif c1.value in researches and researches[c1.value] < c2.value:
                 return [c1.value, c2.value, c3.value]
 
-    def check_minimum_large_cargos(self, planet_info):
-        if len(planet_info.planet_overview['shipyard']) > 0:
-            return
-        ships = planet_info.ships
-        dt_count = 0
-
-        if planet_info.level > 70:
-            dt_count = 5
-        if planet_info.level > 80:
-            dt_count = 15
-
-        dt = int(ships['large_cargo'])
-        if dt < dt_count:
-            self.ogame.build(planet_info.id, (Ships['LargeCargo'], dt_count - dt))
-
     def check_colony_def_ships(self, planet_info):
         if len(planet_info.planet_overview['shipyard']) > 0:
             return
@@ -244,12 +225,12 @@ class Bot:
         if shipyard >= 8 and planet_info.level > 80:
             ldl_count = 500 - ldl
             gauss_count = 20 - gauses
-            solars_count = 100 - solars
+            solars_count = 50 - solars
             dt_count = 20 - dt
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
-        if dt_count > 0 and probes_count > 0:
+        if dt_count > 0 and planet_info.resources['crystal'] > 30000 and planet_info.resources['metal'] > 30000:
             self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
         if anti_rockets_count > 0:
             self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
@@ -294,21 +275,24 @@ class Bot:
             dt_count = 15 - dt
             probes_count = 1 - probes
 
-        if crystal_mine > 15:
-            ldl_count = 113 - ldl
+        if planet_info.level > self.collaborate_minimum_level:
+            ldl_count = 300 - ldl
+            gauss_count = 10 - gauses
             probes_count = 1 - probes
         if shipyard >= 8 and planet_info.level > 80:
             ldl_count = 1200 - ldl
-            gauss_count = 30 - gauses
+            gauss_count = 50 - gauses
             dt_count = 45 - dt
         if shipyard >= 8 and planet_info.level > 90:
-            ldl_count = 1000 - ldl
-            gauss_count = 50 - gauses
-            solars_count = 150 - solars
-            dt_count = 80 - dt
+            ldl_count = 1400 - ldl
+            gauss_count = 200 - gauses
+            solars_count = 70 - solars
+            dt_count = 150 - dt
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
+        if dt_count > 0:
+            self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
         if anti_rockets_count > 0:
             self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
         if gauss_count > 0:
@@ -320,8 +304,6 @@ class Bot:
             self.ogame.build(planet_id, (Ships['SolarSatellite'], solars_count))
         if probes_count > 0:
             self.ogame.build(planet_id, (Ships['EspionageProbe'], probes_count))
-        if dt_count > 0:
-            self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
 
     def build_on_planet_from_parsed_xlsx(self, planet_id, cells, planetInfo):
         researches = self.researches
@@ -459,18 +441,21 @@ class Bot:
         mother_coordinates = planet_info.infos['coordinate']
         galaxy = mother_coordinates['galaxy']
         system = mother_coordinates['system']
+        totall_cargo = planet_info.ships['large_cargo']
         for i in (1, 2, 3):
             system_delta = random.randint(-5, 5)
-            dt_count = 0
+            dt_count = round(totall_cargo / 2)
 
-            if planet_info.level > 70:
-                dt_count = 5
-            if planet_info.level > 80:
-                dt_count = 15
+            if dt_count > 50:
+                dt_count = 50
+
             if planet_info.level > 95:
                 dt_count = 100
             if planet_info.level > 100:
                 dt_count = 250
+
+            if dt_count == 0:
+                return
 
             ships = [(Ships['EspionageProbe'], 1), (Ships['LargeCargo'], dt_count)]
             speed = Speed['100%']
@@ -510,7 +495,7 @@ class Bot:
             return
         if len(exst_req) > 0:
             return
-        if next_build[0] is None or next_build[0] == '' or next_build[0] == 'solar_satellite':
+        if next_build[0] is None or next_build[0] == '':
             return
 
         cost = Utils.calc_build_cost(next_build[0], next_build[1])

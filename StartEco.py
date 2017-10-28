@@ -22,8 +22,8 @@ try:
     for a, b, c, d, e, f, g, h in cells:
         if a.value is None or a.value == "":
             continue
-        if e.value != 'eco':
-            continue
+        # if e.value != 'eco':
+        #     continue
         try:
             start_time = datetime.now()
             login = a.value
@@ -45,7 +45,7 @@ try:
             print('Time elapsed for {} is {}[hh:mm:ss.ms]'.format(login, time_elapsed))
 
     timeElapsed = datetime.now() - startTime
-    wait_time = random.uniform(2400, 2600)
+    wait_time = random.uniform(1200, 1400)
     print('{}: **************     ENDED CHECKING ALL ECO ACCOUNTS: elapsed cycle time: {}[hh:mm:ss.ms], '
           'defend time: {:6.2f}[m]'.format(datetime.now(), timeElapsed, wait_time/60))
 except Exception as e:
