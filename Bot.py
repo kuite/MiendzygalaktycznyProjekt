@@ -1,14 +1,13 @@
 # from ogame import OGame
 # from ogame.constants import Ships, Speed, Facilities, Buildings, Research, Defense, Missions
 from pyogame.ogame import OGame
-from ogame.constants import Ships, Speed, Facilities, Buildings, Research, Defense, Missions
+from pyogame.ogame.constants import Ships, Speed, Facilities, Buildings, Research, Defense, Missions
 import Utils
 import openpyxl
 from time import sleep
 import random
 from tinydb import TinyDB, Query, where
 from datetime import datetime, date
-from dateutil import parser
 
 
 class PlanetInfo:
@@ -87,12 +86,16 @@ class Bot:
 
         for planet_info in self.planet_infos.values():
             planet_id = planet_info.id
-            print('Planet currently working: ' + planet_info.infos['planet_name'])
+            print('Planet currently working: {}, planet id: {}'.format(planet_info.infos['planet_name'], planet_id))
             try:
                 if planet_id == self.mother_id:
+                    print('s: function: {}'.format('self.develop_colony_planet(planet_info, self.colony_cells)'))
                     self.develop_mother_planet(planet_info, self.mother_cells)
+                    print('e: function: {}'.format('self.develop_mother_planet(planet_info, self.mother_cells)'))
                 else:
+                    print('s: function: {}'.format('self.develop_colony_planet(planet_info, self.colony_cells)'))
                     self.develop_colony_planet(planet_info, self.colony_cells)
+                    print('e: function: {}'.format('self.develop_colony_planet(planet_info, self.colony_cells)'))
             except Exception as e:
                 print('-----======------- Error happend in  start_eco -----======-------')
                 print(e)
