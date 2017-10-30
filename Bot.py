@@ -444,9 +444,9 @@ class Bot:
             ships = [(Ships['LargeCargo'], 9999)]
             speed = Speed['100%']
             where = self.planet_infos[mother_id].infos['coordinate']
-            where['galaxy'] = 5
-            where['system'] = 186
-            where['planet'] = 8
+            where['galaxy'] = 4
+            where['system'] = 425
+            where['position'] = 12
             mission = Missions['Transport']
             resources = {'metal': 999999999, 'crystal': 99999999, 'deuterium': 99999999}
             self.ogame.send_fleet(planet_info.id, ships, speed, where, mission, resources)
