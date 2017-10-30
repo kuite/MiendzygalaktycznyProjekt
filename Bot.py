@@ -59,14 +59,14 @@ class Bot:
             planet_id = planet_info.id
             print('Planet currently working: {}, planet id: {}'.format(planet_info.infos['planet_name'], planet_id))
             try:
+                if planet_id == self.mother_id:
+                    self.send_expeditions(planet_info)
                 self.develop_supplier_planet(planet_info)
             except Exception as e:
                 print('-----======------- Error happend in start_def -----======-------')
                 print(e)
             print('p Planet {} handling finished'.format(planet_info.infos['planet_name']))
 
-    # def start_supplier(self):
-    #     pass
 
     def start_eco(self):
         planets = self.planets
@@ -104,10 +104,6 @@ class Bot:
             ogame.build(mother_id, (Defense['AntiBallisticMissiles'], 70))
 
     def develop_supplier_planet(self, planet_info):
-        ships = planet_info.ships
-        dt = int(ships['large_cargo'])
-        if dt > 49:
-            self.send_expedition(planet_info)
         self.check_supplier_ships(planet_info)
         self.push_to_planet(self.mother_id, planet_info)
 
