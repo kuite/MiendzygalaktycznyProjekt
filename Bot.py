@@ -133,7 +133,7 @@ class Bot:
         mother_coordinates = planet_info.infos['coordinate']
         start_galaxy = mother_coordinates['galaxy']
         # start_system = mother_coordinates['system']
-        start_system = random.randint(100, 400)
+        start_system = random.randint(40, 460)
         resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
         slots = [11, 10, 9, 8, 7, 6, 5]
         current_system = start_system
@@ -215,12 +215,11 @@ class Bot:
         dt_count = 0
         build_dt = False
 
-        if probes < 1 and dt < 50:
-            build_dt = True
-        if dt > 49:
-            probes_count = 1
+        # if probes < 1 and dt < 50:
+        #     build_dt = True
+        #     probes_count = 1
         if planet_info.level > self.collaborate_minimum_level:
-            dt_count = 15 - dt
+            dt_count = 20 - dt
             ldl_count = 200 - ldl
         if shipyard >= 8 and planet_info.level > 80:
             ldl_count = 500 - ldl
@@ -230,7 +229,7 @@ class Bot:
         if silos_level >= 2:
             anti_rockets_count = silos_level * 10
 
-        if build_dt is True:
+        if dt_count > 0:
             self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
         if anti_rockets_count > 0:
             self.ogame.build(planet_id, (Defense['AntiBallisticMissiles'], anti_rockets_count))
@@ -241,6 +240,7 @@ class Bot:
         if solars_count > 0:
             self.ogame.build(planet_id, (Ships['SolarSatellite'], solars_count))
         if probes_count > 0:
+            print('DEBUG: building EspionageProbe in number of {}'.format(probes_count))
             self.ogame.build(planet_id, (Ships['EspionageProbe'], probes_count))
 
     def check_supplier_ships(self, planet_info):
@@ -258,10 +258,10 @@ class Bot:
         probes_count = 0
         dt_count = 0
 
-        if probes < 1 and dt < 50:
-            dt_count = 50 - dt
-        if dt > 49:
-            probes_count = 1
+        if dt < 50:
+            dt_count = 40 - dt
+        # if dt > 49:
+        #     probes_count = 1
 
         if dt_count > 0:
             self.ogame.build(planet_id, (Ships['LargeCargo'], dt_count))
@@ -332,7 +332,6 @@ class Bot:
 
     def build_on_planet_from_parsed_xlsx(self, planet_id, cells, planetInfo):
         researches = self.researches
-        # print('DEBUG: c1, c2, c3 in cells:')
         for c1, c2, c3 in cells:
             if c1.value == '':
                 return
@@ -441,8 +440,8 @@ class Bot:
             speed = Speed['100%']
             where = self.planet_infos[mother_id].infos['coordinate']
             where['galaxy'] = 4
-            where['system'] = 425
-            where['position'] = 12
+            where['system'] = 18
+            where['position'] = 4
             mission = Missions['Transport']
             resources = {'metal': 999999999, 'crystal': 99999999, 'deuterium': 99999999}
             self.ogame.send_fleet(planet_info.id, ships, speed, where, mission, resources)
