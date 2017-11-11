@@ -46,11 +46,11 @@ class Bot:
 
         colony_doc = openpyxl.load_workbook('colony_planet_build.xlsx')
         colony_sheet = colony_doc.active
-        self.colony_cells = colony_sheet['A1': 'C139']
+        self.colony_cells = colony_sheet['A1': 'C153']
 
         mother_doc = openpyxl.load_workbook('first_planet_build.xlsx')
         mother_sheet = mother_doc.active
-        self.mother_cells = mother_sheet['A1': 'C185']
+        self.mother_cells = mother_sheet['A1': 'C193']
 
         self.res_req_db = TinyDB('resources_requests.json')
 
@@ -92,6 +92,42 @@ class Bot:
                 print('-----======------- Error happend in  start_eco -----======-------')
                 print(e)
             print('p Planet {} handling finished'.format(planet_info.infos['planet_name']))
+
+    @staticmethod
+    def start_rocketing(ogame):
+        mother_id = ogame.get_planet_by_name('Planeta matka')
+        defense = ogame.get_defense(mother_id)
+        attack_rockets = defense['interplanetary_missiles']
+        # if attack_rockets > 10:
+        #     ships = [(Defense['InterplanetaryMissiles'], attack_rockets)]
+        #     speed = Speed['100%']
+        #     where = {'galaxy': 5, 'system': 399, 'position': 4}
+        #     mission = Missions['Attack']
+        #     resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
+        #     ogame.send_fleet(mother_id, ships, speed, where, mission, resources)
+        #     print('rocketing to {}, rocekts count: {}'.format(str(where), attack_rockets))
+        if attack_rockets < 50:
+            ogame.build(mother_id, (Defense['InterplanetaryMissiles'], 50))
+
+
+
+        # planets_ids = ogame.get_planet_ids()
+        # for planet_id in planets_ids:
+        #     if ogame.get_planet_infos(planet_id)['planet_name'] == 'asd4':
+        #         continue
+        #     defense = ogame.get_defense(planet_id)
+        #     attack_rockets = defense['interplanetary_missiles']
+        #     if attack_rockets < 50:
+        #         ogame.build(planet_id, (Defense['InterplanetaryMissiles'], 50))
+        #     if attack_rockets > 20:
+        #         ships = [(Defense['InterplanetaryMissiles'], attack_rockets)]
+        #         speed = Speed['100%']
+        #         where = {'galaxy': 5, 'system': 399, 'position': 4}
+        #         mission = Missions['Attack']
+        #         resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
+        #         ogame.send_fleet(planet_id, ships, speed, where, mission, resources)
+
+
 
     @staticmethod
     def check_anti_ballistic_missiles_on_main_planet(ogame):

@@ -1,5 +1,5 @@
 from Bot import Bot
-from ogame import OGame
+from pyogame.ogame import OGame
 import openpyxl
 import time
 from random import randint
@@ -22,8 +22,8 @@ try:
     for a, b, c, d, e, f, g, h in cells:
         if a.value is None or a.value == "":
             continue
-        # if e.value != 'eco':
-        #     continue
+        if e.value != 'rocketing':
+            continue
         try:
             start_time = datetime.now()
             login = a.value
@@ -35,8 +35,9 @@ try:
             print('server : ' + server)
             print('uni : ' + uni)
 
-            bot = Bot(login, password, server, uni)
-            bot.start_supplier()
+            ogame = OGame(uni, login, password, server)
+            # bot = Bot(login, password, server, uni)
+            Bot.start_rocketing(ogame)
         except Exception as e:
             print('-----======------- Error happend in bot -----======-------')
             print(e)
