@@ -94,39 +94,12 @@ class Bot:
             print('p Planet {} handling finished'.format(planet_info.infos['planet_name']))
 
     @staticmethod
-    def start_rocketing(ogame):
+    def restore_attack_missiles(ogame):
         mother_id = ogame.get_planet_by_name('Planeta matka')
         defense = ogame.get_defense(mother_id)
         attack_rockets = defense['interplanetary_missiles']
-        # if attack_rockets > 10:
-        #     ships = [(Defense['InterplanetaryMissiles'], attack_rockets)]
-        #     speed = Speed['100%']
-        #     where = {'galaxy': 5, 'system': 399, 'position': 4}
-        #     mission = Missions['Attack']
-        #     resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
-        #     ogame.send_fleet(mother_id, ships, speed, where, mission, resources)
-        #     print('rocketing to {}, rocekts count: {}'.format(str(where), attack_rockets))
         if attack_rockets < 50:
             ogame.build(mother_id, (Defense['InterplanetaryMissiles'], 50))
-
-
-
-        # planets_ids = ogame.get_planet_ids()
-        # for planet_id in planets_ids:
-        #     if ogame.get_planet_infos(planet_id)['planet_name'] == 'asd4':
-        #         continue
-        #     defense = ogame.get_defense(planet_id)
-        #     attack_rockets = defense['interplanetary_missiles']
-        #     if attack_rockets < 50:
-        #         ogame.build(planet_id, (Defense['InterplanetaryMissiles'], 50))
-        #     if attack_rockets > 20:
-        #         ships = [(Defense['InterplanetaryMissiles'], attack_rockets)]
-        #         speed = Speed['100%']
-        #         where = {'galaxy': 5, 'system': 399, 'position': 4}
-        #         mission = Missions['Attack']
-        #         resources = {'metal': 0, 'crystal': 0, 'deuterium': 0}
-        #         ogame.send_fleet(planet_id, ships, speed, where, mission, resources)
-
 
 
     @staticmethod
